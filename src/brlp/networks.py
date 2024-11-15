@@ -84,18 +84,25 @@ def init_latent_diffusion(checkpoints_path: Optional[str] = None) -> nn.Module:
                                           in_channels=3, 
                                           out_channels=3, 
                                           num_res_blocks=2, 
+                                        #   num_res_blocks=1, 
                                           num_channels=(256, 512, 768), 
+                                        #   num_channels=(128, 256, 512), 
+                                        #   num_channels=(64, 128, 256), 
                                           attention_levels=(False, True, True), 
                                           norm_num_groups=32, 
                                           norm_eps=1e-6, 
                                           resblock_updown=True, 
                                           num_head_channels=(0, 512, 768), 
+                                        #   num_head_channels=(0, 256, 512),  
+                                        #   num_head_channels=(0, 128, 256), 
                                           transformer_num_layers=1,
                                           with_conditioning=True,
                                           cross_attention_dim=8,
+                                        #   cross_attention_dim=3,
                                           num_class_embeds=None, 
                                           upcast_attention=True, 
-                                          use_flash_attention=False)
+                                          use_flash_attention=False
+                                          )
     return load_if(checkpoints_path, latent_diffusion)
 
 
@@ -112,18 +119,23 @@ def init_controlnet(checkpoints_path: Optional[str] = None) -> nn.Module:
     controlnet = ControlNet(spatial_dims=3, 
                             in_channels=3,
                             num_res_blocks=2, 
-                            num_channels=(256, 512, 768), 
+                            # num_channels=(256, 512, 768), 
+                            num_channels=(128, 256, 512), 
                             attention_levels=(False, True, True), 
                             norm_num_groups=32, 
                             norm_eps=1e-6, 
                             resblock_updown=True, 
-                            num_head_channels=(0, 512, 768), 
+                            # num_head_channels=(0, 512, 768), 
+                            num_head_channels=(0, 256, 512), 
                             transformer_num_layers=1, 
                             with_conditioning=True,
                             cross_attention_dim=8, 
+                            # cross_attention_dim=3, 
                             num_class_embeds=None, 
                             upcast_attention=True, 
                             use_flash_attention=False, 
                             conditioning_embedding_in_channels=4,  
-                            conditioning_embedding_num_channels=(256,))
+                            # conditioning_embedding_num_channels=(256,)
+                            conditioning_embedding_num_channels=(128,)
+                            )
     return load_if(checkpoints_path, controlnet)

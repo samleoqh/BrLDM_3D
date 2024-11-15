@@ -20,7 +20,8 @@ def sample_using_diffusion(
     schedule: str = 'scaled_linear_beta',
     beta_start: float = 0.0015, 
     beta_end: float = 0.0205, 
-    verbose: bool = True
+    verbose: bool = True,
+    z: torch.Tensor = None,
 ) -> torch.Tensor: 
     """
     Sampling random brain MRIs that follow the covariates in `context`.
@@ -56,7 +57,10 @@ def sample_using_diffusion(
     context = context.unsqueeze(0).to(device).to(device)
 
     # drawing a random z_T ~ N(0,I)
-    z = torch.randn(const.LATENT_SHAPE_DM).unsqueeze(0).to(device)
+    if z is None:
+        z = torch.randn(const.LATENT_SHAPE_DM).unsqueeze(0).to(device)
+    else:
+        z = z
     
     progress_bar = tqdm(scheduler.timesteps) if verbose else scheduler.timesteps
     for t in progress_bar:
@@ -164,6 +168,10 @@ def sample_using_controlnet_and_z(
                 # convert the timestep to a tensor.
                 timestep = torch.tensor([t]).repeat(average_over_n).to(device)
 
+                # print(z.shape, context.shape, controlnet_condition.shape)
+                if len(context.shape)==4:
+                    context = context.squeeze(0)
+                    # print(context.shape)
                 # get the intermediate features from the ControlNet
                 # by feeding the starting latent, the covariates and the timestep
                 down_h, mid_h = controlnet(
