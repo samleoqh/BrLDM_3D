@@ -36,8 +36,8 @@ if __name__ == '__main__':
     parser.add_argument('--aekl_ckpt',      default=None,  type=str)
     parser.add_argument('--disc_ckpt',      default=None,  type=str)
     parser.add_argument('--num_workers',    default=8,     type=int)
-    parser.add_argument('--n_epochs',       default=5,     type=int)
-    parser.add_argument('--max_batch_size', default=2,     type=int)
+    parser.add_argument('--n_epochs',       default=500,   type=int)
+    parser.add_argument('--max_batch_size', default=1,     type=int)
     parser.add_argument('--batch_size',     default=16,    type=int)
     parser.add_argument('--lr',             default=1e-4,  type=float)
     parser.add_argument('--aug_p',          default=0.8,   type=float)
@@ -82,8 +82,8 @@ if __name__ == '__main__':
                                       is_fake_3d=True, 
                                       fake_3d_ratio=0.2).to(DEVICE)
     
-    optimizer_g = torch.optim.Adam(autoencoder.parameters(), lr=args.lr)
-    optimizer_d = torch.optim.Adam(discriminator.parameters(), lr=args.lr)
+    optimizer_g = torch.optim.Adam(autoencoder.parameters(), lr=args.lr*0.05)
+    optimizer_d = torch.optim.Adam(discriminator.parameters(), lr=args.lr*0.05)
 
 
     gradacc_g = GradientAccumulation(actual_batch_size=args.max_batch_size,
@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
         for step, batch in progress_bar:
 
-            with autocast(enabled=True):
+            with torch.autocast('cuda', enabled=True):
 
                 images = batch["image"].to(DEVICE)
                 reconstruction, z_mu, z_sigma = autoencoder(images)
@@ -136,7 +136,7 @@ if __name__ == '__main__':
                 
             gradacc_g.step(loss_g, step)
 
-            with autocast(enabled=True):
+            with torch.autocast('cuda', enabled=True):
 
                 # Here we compute the loss for the discriminator. Keep in mind that
                 # the loss used is an MSE between the output logits and the expected logits.
